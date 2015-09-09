@@ -30,7 +30,13 @@ Usage
 Reference
 ---------
 
-* (Scarango)[https://github.com/aurelijusb/scarango]
-* (ArangoDB)[https://www.arangodb.com/]
+* [Scarango](https://github.com/aurelijusb/scarango)
+* [ArangoDB](https://www.arangodb.com/)
 
-Example is derived from (Scarango test file)[https://github.com/aurelijusb/scarango/blob/master/src/main/scala/com/auginte/scarango/Main.scala].
+Example is derived from [Scarango test file](https://github.com/aurelijusb/scarango/blob/master/src/main/scala/com/auginte/scarango/Main.scala).
+
+License?
+--------
+
+Example itself have no restrictions.
+Driver and database have permissive Apache 2.0 license.
