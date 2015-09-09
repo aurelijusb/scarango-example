@@ -21,7 +21,7 @@ object build extends sbt.Build {
 
   // Needed while driver is not synced with Maven Central
   val scarangoAtSonatype = Seq(
-    "OSS" at "https//oss.sonatype.org/content/groups/public"
+    "Sonatype OOS" at "https://oss.sonatype.org/content/repositories/releases"
   )
 
   // Your project (this notation will helps scaling to multi-project setup)
