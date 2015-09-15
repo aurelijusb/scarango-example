@@ -16,7 +16,7 @@ object build extends sbt.Build {
 
   // Main line for project to work
   val buildDependencies = Seq(
-    "com.auginte" %% "scarango" % "0.2.3"
+    "com.auginte" %% "scarango" % "0.2.4"
   )
 
   // Needed while driver is not synced with Maven Central

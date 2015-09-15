@@ -3,11 +3,13 @@ package example
 import akka.actor.{Actor, ActorSystem, Props}
 import com.auginte.scarango.Scarango
 import com.auginte.scarango.common.TestKit
+import com.auginte.scarango.errors.{ScarangoError, UnexpectedResponse}
 import com.auginte.scarango.request
-import com.auginte.scarango.response
 import com.auginte.scarango.request._
+import com.auginte.scarango.request.parts.{User, Authorisation}
+import com.auginte.scarango.response
 import com.auginte.scarango.response._
-import com.auginte.scarango.errors._
+import com.auginte.scarango.state.{CollectionName, DatabaseName}
 
 /**
  * Class for faster testing
@@ -15,8 +17,8 @@ import com.auginte.scarango.errors._
 object Main extends App {
   class Client extends Actor {
 
-    val dbName = TestKit.unique
-    val collectionName = TestKit.unique
+    implicit val dbName = DatabaseName(TestKit.unique)
+    implicit val collectionName = CollectionName(TestKit.unique)
     val documentData = """{"some":"data"}"""
     var newDocumentId: String = ""
 
@@ -26,26 +28,40 @@ object Main extends App {
 
     def lastRequest(text: String) = println(Console.RED_B + "[LAST REQUEST]" + Console.RESET + " " + Console.RED + text + Console.RESET)
 
+    def lastResponse(text: String) = println(Console.RED_B + "[LAST RESPONSE]" + Console.RESET + " " + Console.RED + text + Console.RESET)
+
     def unexpected(text: String) = println(Console.RED_B + "[UNEXPECTED]" + Console.RESET + " " + Console.RED + text + Console.RESET)
 
-    // The most important line:
     val db = system.actorOf(Props[Scarango])
+
+    val authorisedUsers = List(
+      User("owner", "123456", active = true, Map("name" -> "John smith", "email" -> "a@b.com")),
+      User("public", "", active = false)
+    )
+    val userDatabase = DatabaseName("u_" + TestKit.unique)
+    val userCollection = CollectionName("userCollection")
+    val userAuthorisation = Authorisation.forUser(authorisedUsers.head)
+
 
     override def receive: Receive = {
       case "start" =>
         db ! GetVersion
         db ! CreateDatabase(dbName)
-        db ! CreateCollection(collectionName, dbName)
-        db ! GetCollection(collectionName, dbName)
-        db ! CreateDocument(documentData, collectionName, dbName)
+        db ! CreateCollection(collectionName)
+        db ! GetCollection(collectionName)
+        db ! CreateDocument(documentData)
+
+        db ! CreateDatabase(userDatabase, authorisedUsers)
+        db ! CreateCollection(userCollection)(userDatabase, userAuthorisation)
 
       case "removeDocument" =>
-        db ! RemoveDocument(newDocumentId, dbName)
+        db ! RemoveDocument(newDocumentId)
 
       case "cleanup" =>
-        db ! RemoveCollection(collectionName, dbName)
+        db ! RemoveCollection(collectionName)
         db ! request.Identifiable(ListDatabases, id = "with database")
         db ! RemoveDatabase(dbName)
+        db ! RemoveDatabase(userDatabase)
         db ! request.Identifiable(ListDatabases, id = "database removed")
 
       case v: Version =>
@@ -73,8 +89,8 @@ object Main extends App {
       case c: DocumentCreated =>
         ok("Document created: " + c.id)
         newDocumentId = c.id
-        db ! GetDocument(c.id, dbName)
-        db ! ListDocuments(collectionName, dbName)
+        db ! GetDocument(c.id)
+        db ! ListDocuments(collectionName)
 
       case d: Document =>
         ok(s"Document ID: ${d.id} DATA: ${d.json}")
@@ -87,12 +103,13 @@ object Main extends App {
       case c: DocumentRemoved =>
         ok("Document removed: " + c.id + " in " + c.database)
 
-      case CollectionRemoved(RemoveCollection(name, _), raw) =>
+      case CollectionRemoved(RemoveCollection(name), raw) =>
         ok("Collection removed: " + name + " with id " + raw.id)
 
       case e: UnexpectedResponse =>
         error(e.getMessage)
         lastRequest(e.lastRequest.toString)
+        lastResponse(e.raw.toString)
         context.system.shutdown()
 
       case e: ScarangoError =>

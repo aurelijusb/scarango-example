@@ -10,7 +10,7 @@ Functionality:
 * Create/List/Drop Collection
 * Create/Read/Drop Document
 
-This example use Scarango **v0.2.3** and works best with ArangoDB **v2.6.7**
+This example use Scarango **v0.2.4** and works best with ArangoDB **v2.6.8** with `disable-authentication=false`
 
 Usage
 -----
