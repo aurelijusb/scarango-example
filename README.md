@@ -3,14 +3,9 @@ Example project of Scarango driver
 
 Example of using Scarango: Scala driver for ArangoDB.
 
-Functionality:
+This example use Scarango **v0.3.1** and works best with ArangoDB **v2.8.7** with `disable-authentication=false`
 
-* Getting version
-* Create/Drop Database
-* Create/List/Drop Collection
-* Create/Read/Drop Document
-
-This example use Scarango **v0.2.4** and works best with ArangoDB **v2.6.8** with `disable-authentication=false`
+For examples of older versions - checkout this example by tags.
 
 Usage
 -----
@@ -25,7 +20,7 @@ Usage
 * Option 2: Open with sbt
  * Go to project directory and execute "sbt"
  * When loaded, type `run`
-* You should see `[INFO]` messages from driver and `[OK]` messages from example
+* You should see output of driver
 
 Reference
 ---------
